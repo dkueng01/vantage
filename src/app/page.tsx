@@ -28,6 +28,8 @@ export default function VantageDashboard() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
+  const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
+
   // Einfacher State für Kategorie-Erstellung (könnte man in eigene Component auslagern)
   const [newCatName, setNewCatName] = useState("");
   const [newCatColor, setNewCatColor] = useState("bg-blue-500");
@@ -40,6 +42,11 @@ export default function VantageDashboard() {
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsEditDialogOpen(true);
+  };
+
+  const handleRangeSelect = (start: Date, end: Date) => {
+    setSelectedRange({ start, end });
+    setIsAddDialogOpen(true);
   };
 
   return (
@@ -136,8 +143,8 @@ export default function VantageDashboard() {
           <YearGrid
             year={data.year}
             events={data.events}
-            categories={data.categories} // WICHTIG: Kategorien übergeben
-            onDayClick={handleDayClick}
+            categories={data.categories}
+            onRangeSelect={handleRangeSelect} // NEU statt onDayClick
             onEventClick={handleEventClick}
           />
         </div>
@@ -147,8 +154,9 @@ export default function VantageDashboard() {
       <AddEventDialog
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        defaultDate={selectedDate}
-        categories={data.categories} // Kategorien übergeben
+        // Wir übergeben das Range Objekt
+        defaultRange={selectedRange}
+        categories={data.categories}
         onAddEvent={addEvent}
       />
 

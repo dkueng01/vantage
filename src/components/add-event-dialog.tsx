@@ -15,26 +15,28 @@ import { Category } from '@/lib/types'; // Import Category
 interface AddEventDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultDate: Date | null;
+  defaultRange: { start: Date; end: Date } | null;
   categories: Category[]; // Neue Prop
   onAddEvent: (title: string, startDate: Date, endDate: Date, categoryId: string) => void;
 }
 
-export function AddEventDialog({ isOpen, onClose, categories, defaultDate, onAddEvent }: AddEventDialogProps) {
+export function AddEventDialog({ isOpen, onClose, categories, defaultRange, onAddEvent }: AddEventDialogProps) {
   const [title, setTitle] = useState("");
+  const [categoryId, setCategoryId] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [categoryId, setCategoryId] = useState<string>("");
 
   // Reset und Init wenn Dialog aufgeht
   useEffect(() => {
-    if (isOpen && defaultDate) {
-      setStartDate(defaultDate);
-      setEndDate(defaultDate);
+    if (isOpen && defaultRange) {
+      // Beide Daten vom Drag übernehmen
+      setStartDate(defaultRange.start);
+      setEndDate(defaultRange.end);
+
       setTitle("");
       if (categories.length > 0) setCategoryId(categories[0].id);
     }
-  }, [isOpen, defaultDate]);
+  }, [isOpen, defaultRange, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +48,7 @@ export function AddEventDialog({ isOpen, onClose, categories, defaultDate, onAdd
     }
   };
 
-  if (!defaultDate) return null;
+  if (!defaultRange) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
