@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarEvent, EventType } from '@/lib/types';
+import { CalendarEvent } from '@/lib/types';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Trash2, AlertCircle } from "lucide-react";
@@ -30,7 +30,7 @@ export function EditEventDialog({ isOpen, onClose, event, onUpdate, onDelete }: 
   if (!event) return null;
 
   // Check: Ist es ein System-Event (Misogi/Adventure/Habit)?
-  const isSystemEvent = ['misogi', 'adventure', 'habit'].includes(event.type);
+  const isSystemEvent = ['misogi', 'adventure', 'habit'].includes(event.categoryId);
 
   const handleSave = () => {
     onUpdate(event.id, { title });
@@ -59,7 +59,7 @@ export function EditEventDialog({ isOpen, onClose, event, onUpdate, onDelete }: 
                 {format(event.startDate, "d. MMM", { locale: de })} - {format(event.endDate, "d. MMM yyyy", { locale: de })}
               </p>
               <span className="inline-block mt-2 px-2 py-1 bg-slate-200 text-xs rounded uppercase font-bold text-slate-600">
-                {event.type}
+                {event.categoryId}
               </span>
             </div>
 
