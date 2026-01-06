@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { YearGrid } from "@/components/year-grid";
 import { AddEventDialog } from "@/components/add-event-dialog";
 import { EditEventDialog } from "@/components/edit-event-dialog"; // Sicherstellen, dass der aktualisiert ist
@@ -8,19 +8,21 @@ import { UserNav } from "@/components/user-nav";
 import { useVantage } from "@/hooks/use-vantage";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/lib/types";
-import { Plus, Settings2, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { stackClientApp } from "@/stack/client";
 
 export default function VantageDashboard() {
+  const user = stackClientApp.useUser({ or: "redirect" });
   const {
     data,
     addEvent,
     updateEvent,
     deleteEvent,
     addCategory,
-    deleteCategory
+    deleteCategory,
   } = useVantage();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -62,7 +64,7 @@ export default function VantageDashboard() {
             Vantage <span className="text-slate-400">{data.year}</span>
           </h1>
         </div>
-        <UserNav />
+        <UserNav user={user} />
       </header>
 
       <main className="max-w-[1800px] mx-auto space-y-6">
