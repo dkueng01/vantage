@@ -8,7 +8,7 @@ import { UserNav } from "@/components/user-nav";
 import { useVantage } from "@/hooks/use-vantage";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/lib/types";
-import { Plus, Trash2 } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,19 +55,53 @@ export default function VantageDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
 
-      <header className="flex justify-between items-center mb-8 max-w-[1800px] mx-auto">
+      <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 max-w-[1800px] mx-auto">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center font-bold text-xl">
+          <div className="w-10 h-10 bg-slate-900 text-white rounded-xl shadow-lg flex items-center justify-center font-bold text-xl select-none">
             V
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <span className="text-2xl font-bold tracking-tight text-slate-900 hidden md:block">
             Vantage
-            <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2 py-1">
-              <span className="text-blue-600">{data.year}</span>
-            </div>
-          </h1>
+          </span>
         </div>
-        <UserNav user={user} />
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-white border border-slate-200 shadow-sm rounded-full p-1 pl-4 gap-2">
+
+            <div className="flex items-center gap-2 text-slate-600 select-none mr-2">
+              <Calendar className="w-4 h-4 text-slate-400" />
+              <span className="text-lg font-bold tabular-nums tracking-tight">
+                {data.year}
+              </span>
+            </div>
+
+            <div className="w-[1px] h-6 bg-slate-200"></div>
+
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                onClick={() => changeYear(data.year - 1)}
+                title="Vorheriges Jahr"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                onClick={() => changeYear(data.year + 1)}
+                title="Nächstes Jahr"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          <UserNav user={user} />
+        </div>
       </header>
 
       <main className="max-w-[1800px] mx-auto space-y-6">
