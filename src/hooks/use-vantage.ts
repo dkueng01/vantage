@@ -23,20 +23,15 @@ export function useVantage(initialYear: number = 2026) {
       setIsLoading(true);
       const [cats, evts] = await Promise.all([
         CategoryService.getAll(user),
-        EventService.getAll(user)
+        EventService.getForYear(user, currentYear)
       ]);
 
-      const eventsForYear = evts.filter(e =>
-        e.startDate.getFullYear() === currentYear ||
-        e.endDate.getFullYear() === currentYear
-      );
-
-      setData(prev => ({
+      setData({
         year: currentYear,
         categories: cats,
-        events: eventsForYear
-      }));
-    } finally { setIsLoading(false); }
+        events: evts
+      });
+    } catch (e) { console.error(e); } finally { setIsLoading(false); }
   }, [user, currentYear]);
 
   const changeYear = (year: number) => setCurrentYear(year);

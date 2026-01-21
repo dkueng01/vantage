@@ -12,6 +12,36 @@ const toIsoDateString = (date: Date) => {
 };
 
 export const EventService = {
+  async getForYear(user: CurrentUser, year: number): Promise<CalendarEvent[]> {
+    const pg = await getApiClient(user);
+
+    const startOfYear = `${year}-01-01`;
+    const endOfYear = `${year}-12-31`;
+
+    const { data, error } = await pg
+      .from("events")
+      .select("*")
+      .gte('start_date', startOfYear)
+      .lte('start_date', endOfYear)
+      .order('start_date', { ascending: true });
+
+    if (error) throw error;
+
+    return (data as DbEvent[]).map(e => {
+      const rawStart = new Date(e.start_date);
+      const rawEnd = new Date(e.end_date);
+
+      return {
+        id: e.id,
+        title: e.title,
+        startDate: startOfDay(rawStart),
+        endDate: startOfDay(rawEnd),
+        categoryId: e.category_id,
+        description: e.description
+      };
+    });
+  },
+
   async getAll(user: CurrentUser): Promise<CalendarEvent[]> {
     const pg = await getApiClient(user);
 
@@ -72,7 +102,6 @@ export const EventService = {
   async update(user: CurrentUser, id: string, updates: Partial<CalendarEvent>): Promise<void> {
     const pg = await getApiClient(user);
 
-    // Partial Mapping für Update
     const dbUpdates: any = {};
     if (updates.title) dbUpdates.title = updates.title;
     if (updates.startDate) dbUpdates.start_date = toIsoDateString(updates.startDate);

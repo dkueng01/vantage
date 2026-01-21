@@ -19,7 +19,7 @@ interface YearGridProps {
   onEventClick: (event: CalendarEvent) => void;
 }
 
-export function YearGrid({ year, events, categories, onRangeSelect, onEventClick }: YearGridProps) {
+function YearGridComponent({ year, events, categories, onRangeSelect, onEventClick }: YearGridProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<Date | null>(null);
   const [dragEnd, setDragEnd] = useState<Date | null>(null);
@@ -189,3 +189,13 @@ export function YearGrid({ year, events, categories, onRangeSelect, onEventClick
     </TooltipProvider>
   );
 }
+
+const arePropsEqual = (prev: YearGridProps, next: YearGridProps) => {
+  if (prev.year !== next.year) return false;
+  if (prev.events.length !== next.events.length) return false;
+  if (prev.categories !== next.categories) return false;
+
+  return true;
+};
+
+export const YearGrid = React.memo(YearGridComponent, arePropsEqual);
