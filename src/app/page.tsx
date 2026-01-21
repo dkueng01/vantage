@@ -55,52 +55,71 @@ export default function VantageDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
 
-      <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 max-w-[1800px] mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 text-white rounded-xl shadow-lg flex items-center justify-center font-bold text-xl select-none">
-            V
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900 hidden md:block">
-            Vantage
-          </span>
-        </div>
+      <header className="z-50 w-full bg-slate-50/80 backdrop-blur-md mb-6 transition-all">
+        <div className="max-w-[1800px] mx-auto px-4">
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-white border border-slate-200 shadow-sm rounded-full p-1 pl-4 gap-2">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
-            <div className="flex items-center gap-2 text-slate-600 select-none mr-2">
-              <Calendar className="w-4 h-4 text-slate-400" />
-              <span className="text-lg font-bold tabular-nums tracking-tight">
-                {data.year}
-              </span>
+            <div className="flex items-center justify-between w-full md:w-auto">
+
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 md:w-10 md:h-10 bg-slate-900 text-white rounded-xl shadow-lg shadow-slate-900/10 flex items-center justify-center font-bold text-lg md:text-xl select-none">
+                  V
+                </div>
+                <span className="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
+                  Vantage
+                </span>
+              </div>
+
+              <div className="md:hidden">
+                <UserNav user={user} />
+              </div>
             </div>
 
-            <div className="w-[1px] h-6 bg-slate-200"></div>
+            <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 w-full md:w-auto">
 
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900"
-                onClick={() => changeYear(data.year - 1)}
-                title="Vorheriges Jahr"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center justify-between bg-white border border-slate-200 shadow-sm rounded-full p-1 pl-4 w-full md:w-auto">
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900"
-                onClick={() => changeYear(data.year + 1)}
-                title="Nächstes Jahr"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+                <div className="flex items-center gap-2 text-slate-600 select-none mr-2">
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                  <span className="text-lg font-bold tabular-nums tracking-tight">
+                    {data.year}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="w-[1px] h-6 bg-slate-100"></div>
+
+                  <div className="flex gap-1 pr-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 active:scale-95 transition-all"
+                      onClick={() => changeYear(data.year - 1)}
+                      title="Vorheriges Jahr"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 active:scale-95 transition-all"
+                      onClick={() => changeYear(data.year + 1)}
+                      title="Nächstes Jahr"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden md:block">
+                <UserNav user={user} />
+              </div>
+
             </div>
           </div>
-
-          <UserNav user={user} />
         </div>
       </header>
 
