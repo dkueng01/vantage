@@ -8,11 +8,12 @@ import { UserNav } from "@/components/user-nav";
 import { useVantage } from "@/hooks/use-vantage";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/lib/types";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { stackClientApp } from "@/stack/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function VantageDashboard() {
   const user = stackClientApp.useUser({ or: "redirect" });
@@ -27,7 +28,6 @@ export default function VantageDashboard() {
   } = useVantage();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -45,6 +45,12 @@ export default function VantageDashboard() {
     setSelectedRange({ start, end });
     setIsAddDialogOpen(true);
   };
+
+  const categoryCounts = data.categories.reduce((acc, cat) => {
+    const count = data.events.filter(e => e.categoryId === cat.id).length;
+    acc[cat.id] = count;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
@@ -72,10 +78,28 @@ export default function VantageDashboard() {
             <span className="text-xs font-bold uppercase text-slate-400 mr-2">Kategorien:</span>
 
             {data.categories.map(cat => (
-              <div key={cat.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-sm font-medium group">
-                <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
-                {cat.name}
-              </div>
+              <TooltipProvider key={cat.id}>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-sm font-medium group cursor-default transition-colors hover:border-slate-300">
+                      <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
+                      {cat.name}
+
+                      {categoryCounts[cat.id] > 0 && (
+                        <span className="ml-1.5 text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center">
+                          {categoryCounts[cat.id]}
+                        </span>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-semibold">
+                      {categoryCounts[cat.id] || 0} Einträge
+                    </p>
+                    <p className="text-xs text-slate-400">im Jahr {data.year}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ))}
 
             <Dialog>
