@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { YearGrid } from "@/components/year-grid";
 import { AddEventDialog } from "@/components/add-event-dialog";
-import { EditEventDialog } from "@/components/edit-event-dialog"; // Sicherstellen, dass der aktualisiert ist
+import { EditEventDialog } from "@/components/edit-event-dialog";
 import { UserNav } from "@/components/user-nav";
 import { useVantage } from "@/hooks/use-vantage";
 import { Button } from "@/components/ui/button";
@@ -32,14 +32,8 @@ export default function VantageDashboard() {
 
   const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
 
-  // Einfacher State für Kategorie-Erstellung (könnte man in eigene Component auslagern)
   const [newCatName, setNewCatName] = useState("");
   const [newCatColor, setNewCatColor] = useState("bg-blue-500");
-
-  const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
-    setIsAddDialogOpen(true);
-  };
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -54,7 +48,6 @@ export default function VantageDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
 
-      {/* Header */}
       <header className="flex justify-between items-center mb-8 max-w-[1800px] mx-auto">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center font-bold text-xl">
@@ -69,7 +62,6 @@ export default function VantageDashboard() {
 
       <main className="max-w-[1800px] mx-auto space-y-6">
 
-        {/* Top Bar: Kategorien Verwaltung & Legende */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 
           <div className="flex flex-wrap gap-3 items-center">
@@ -82,7 +74,6 @@ export default function VantageDashboard() {
               </div>
             ))}
 
-            {/* Kategorie Hinzufügen Dialog */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="rounded-full h-8 border-dashed">
@@ -98,7 +89,6 @@ export default function VantageDashboard() {
                   </div>
                   <div className="grid gap-2">
                     <Label>Farbe (Tailwind Class)</Label>
-                    {/* Hier könnte man später einen Color Picker bauen */}
                     <select
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={newCatColor}
@@ -140,34 +130,29 @@ export default function VantageDashboard() {
           </div>
         </div>
 
-        {/* Kalender */}
         <div className="bg-white p-2 md:p-6 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <YearGrid
             year={data.year}
             events={data.events}
             categories={data.categories}
-            onRangeSelect={handleRangeSelect} // NEU statt onDayClick
+            onRangeSelect={handleRangeSelect}
             onEventClick={handleEventClick}
           />
         </div>
       </main>
 
-      {/* Dialogs */}
       <AddEventDialog
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        // Wir übergeben das Range Objekt
         defaultRange={selectedRange}
         categories={data.categories}
         onAddEvent={addEvent}
       />
 
-      {/* EditEventDialog benötigt Update für Kategorien-Auswahl analog zu AddEventDialog */}
       <EditEventDialog
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         event={selectedEvent}
-        // categories={data.categories} // Müsste im EditDialog auch hinzugefügt werden
         onUpdate={updateEvent}
         onDelete={deleteEvent}
       />
