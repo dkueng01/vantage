@@ -18,11 +18,12 @@ export default function VantageDashboard() {
   const user = stackClientApp.useUser({ or: "redirect" });
   const {
     data,
+    year,
+    changeYear,
     addEvent,
     updateEvent,
     deleteEvent,
     addCategory,
-    deleteCategory,
   } = useVantage();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -53,8 +54,11 @@ export default function VantageDashboard() {
           <div className="w-10 h-10 bg-slate-900 text-white rounded-lg flex items-center justify-center font-bold text-xl">
             V
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Vantage <span className="text-slate-400">{data.year}</span>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            Vantage
+            <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2 py-1">
+              <span className="text-blue-600">{data.year}</span>
+            </div>
           </h1>
         </div>
         <UserNav user={user} />
