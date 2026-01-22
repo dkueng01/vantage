@@ -78,7 +78,7 @@ export default function VantageDashboard() {
 
             <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 w-full md:w-auto">
 
-              <div className="flex items-center justify-between bg-white border border-slate-200 shadow-sm rounded-full p-1 pl-4 w-full md:w-auto">
+              <div className="flex items-center justify-between bg-white border border-slate-200 rounded-full p-1 pl-4 w-full md:w-auto">
 
                 <div className="flex items-center gap-2 text-slate-600 select-none mr-2">
                   <Calendar className="w-4 h-4 text-slate-400" />
@@ -215,7 +215,7 @@ export default function VantageDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-2 md:p-6 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white p-2 md:p-6 rounded-2xl border border-slate-200 overflow-hidden">
           <YearGrid
             year={data.year}
             events={data.events}
