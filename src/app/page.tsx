@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { stackClientApp } from "@/stack/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { differenceInCalendarDays } from "date-fns";
 
 export default function VantageDashboard() {
   const user = stackClientApp.useUser({ or: "redirect" });
@@ -45,12 +46,6 @@ export default function VantageDashboard() {
     setSelectedRange({ start, end });
     setIsAddDialogOpen(true);
   };
-
-  const categoryCounts = data.categories.reduce((acc, cat) => {
-    const count = data.events.filter(e => e.categoryId === cat.id).length;
-    acc[cat.id] = count;
-    return acc;
-  }, {} as Record<string, number>);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
@@ -133,30 +128,44 @@ export default function VantageDashboard() {
             </span>
 
             <div className="flex-1 overflow-x-auto flex items-center gap-3 pb-2 -mb-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-              {data.categories.map(cat => (
-                <TooltipProvider key={cat.id}>
-                  <Tooltip delayDuration={300}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-sm font-medium group cursor-default transition-colors hover:border-slate-300 whitespace-nowrap flex-shrink-0">
-                        <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
-                        {cat.name}
+              {data.categories.map(cat => {
+                const categoryDays = data.categories.reduce((acc, cat) => {
+                  const events = data.events.filter(e => e.categoryId === cat.id);
 
-                        {categoryCounts[cat.id] > 0 && (
-                          <span className="ml-1.5 text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center">
-                            {categoryCounts[cat.id]}
-                          </span>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="font-semibold">
-                        {categoryCounts[cat.id] || 0} Einträge
-                      </p>
-                      <p className="text-xs text-slate-400">im Jahr {data.year}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ))}
+                  const totalDays = events.reduce((sum, event) => {
+                    const days = Math.abs(differenceInCalendarDays(event.endDate, event.startDate)) + 1;
+                    return sum + days;
+                  }, 0);
+
+                  acc[cat.id] = totalDays;
+                  return acc;
+                }, {} as Record<string, number>);
+
+                return (
+                  <TooltipProvider key={cat.id}>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-sm font-medium group cursor-default transition-colors hover:border-slate-300 whitespace-nowrap flex-shrink-0">
+                          <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
+                          {cat.name}
+
+                          {categoryDays[cat.id] > 0 && (
+                            <span className="ml-1.5 text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center font-bold">
+                              {categoryDays[cat.id]}d
+                            </span>
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="font-semibold">
+                          {categoryDays[cat.id] || 0} Tage
+                        </p>
+                        <p className="text-xs text-slate-400">geplant in {data.year}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )
+              })}
 
               <Dialog>
                 <DialogTrigger asChild>
