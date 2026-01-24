@@ -1,13 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { CalendarEvent } from '@/lib/types';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Trash2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const formSchema = z.object({
+  title: z.string().min(1, "Bitte gib einen Titel ein"),
+})
 
 interface EditEventDialogProps {
   isOpen: boolean;
@@ -18,22 +32,27 @@ interface EditEventDialogProps {
 }
 
 export function EditEventDialog({ isOpen, onClose, event, onUpdate, onDelete }: EditEventDialogProps) {
-  const [title, setTitle] = useState("");
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+    },
+  })
 
-  // Wenn Dialog aufgeht, Daten laden
   useEffect(() => {
     if (event) {
-      setTitle(event.title);
+      form.reset({
+        title: event.title,
+      })
     }
-  }, [event]);
+  }, [event, form]);
 
   if (!event) return null;
 
-  // Check: Ist es ein System-Event (Misogi/Adventure/Habit)?
   const isSystemEvent = ['misogi', 'adventure', 'habit'].includes(event.categoryId);
 
-  const handleSave = () => {
-    onUpdate(event.id, { title });
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    onUpdate(event.id, { title: values.title });
     onClose();
   };
 
@@ -75,31 +94,37 @@ export function EditEventDialog({ isOpen, onClose, event, onUpdate, onDelete }: 
             </DialogFooter>
           </div>
         ) : (
-          /* Normales Event: Bearbeitbar */
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Titel</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="text-sm text-slate-500">
-              Zeitraum: {format(event.startDate, "d. MMM", { locale: de })} - {format(event.endDate, "d. MMM yyyy", { locale: de })}
-            </div>
-
-            <DialogFooter className="flex justify-between sm:justify-between w-full">
-              <Button variant="destructive" size="icon" onClick={handleDelete} title="Löschen">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={onClose}>Abbrechen</Button>
-                <Button onClick={handleSave}>Speichern</Button>
+              <div className="text-sm text-slate-500">
+                Zeitraum: {format(event.startDate, "d. MMM", { locale: de })} - {format(event.endDate, "d. MMM yyyy", { locale: de })}
               </div>
-            </DialogFooter>
-          </div>
+
+              <DialogFooter className="flex justify-between sm:justify-between w-full">
+                <Button type="button" variant="destructive" size="icon" onClick={handleDelete} title="Löschen">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
+                  <Button type="submit">Speichern</Button>
+                </div>
+              </DialogFooter>
+            </form>
+          </Form>
         )}
       </DialogContent>
     </Dialog>

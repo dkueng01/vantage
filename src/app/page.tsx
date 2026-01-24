@@ -4,14 +4,12 @@ import { useState } from "react";
 import { YearGrid } from "@/components/year-grid";
 import { AddEventDialog } from "@/components/add-event-dialog";
 import { EditEventDialog } from "@/components/edit-event-dialog";
+import { AddCategoryDialog } from "@/components/add-category-dialog";
 import { UserNav } from "@/components/user-nav";
 import { useVantage } from "@/hooks/use-vantage";
 import { Button } from "@/components/ui/button";
 import { CalendarEvent } from "@/lib/types";
 import { Calendar, ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { stackClientApp } from "@/stack/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { differenceInCalendarDays } from "date-fns";
@@ -34,8 +32,7 @@ export default function VantageDashboard() {
 
   const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
 
-  const [newCatName, setNewCatName] = useState("");
-  const [newCatColor, setNewCatColor] = useState("bg-blue-500");
+
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -167,50 +164,7 @@ export default function VantageDashboard() {
                 )
               })}
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-full h-8 border-dashed flex-shrink-0 whitespace-nowrap">
-                    <Plus className="w-3 h-3 mr-1" /> Neu
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Neue Kategorie</DialogTitle></DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label>Name</Label>
-                      <Input placeholder="z.B. Arbeit" value={newCatName} onChange={e => setNewCatName(e.target.value)} />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Farbe (Tailwind Class)</Label>
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={newCatColor}
-                        onChange={e => setNewCatColor(e.target.value)}
-                      >
-                        <option value="bg-red-500">Rot</option>
-                        <option value="bg-orange-500">Orange</option>
-                        <option value="bg-amber-400">Gelb</option>
-                        <option value="bg-green-500">Grün</option>
-                        <option value="bg-emerald-500">Smaragd</option>
-                        <option value="bg-teal-400">Türkis</option>
-                        <option value="bg-cyan-500">Cyan</option>
-                        <option value="bg-blue-500">Blau</option>
-                        <option value="bg-indigo-500">Indigo</option>
-                        <option value="bg-purple-500">Lila</option>
-                        <option value="bg-pink-500">Pink</option>
-                        <option value="bg-slate-600">Grau</option>
-                        <option value="bg-slate-800">Schwarz</option>
-                      </select>
-                    </div>
-                    <Button onClick={() => {
-                      if (newCatName) {
-                        addCategory(newCatName, newCatColor);
-                        setNewCatName("");
-                      }
-                    }}>Erstellen</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <AddCategoryDialog onAddCategory={addCategory} />
             </div>
           </div>
 

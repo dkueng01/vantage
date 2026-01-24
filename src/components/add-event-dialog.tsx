@@ -1,51 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { Category } from '@/lib/types'; // Import Category
+import { Category } from '@/lib/types';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const formSchema = z.object({
+  title: z.string().min(1, "Bitte gib einen Titel ein"),
+  categoryId: z.string().min(1, "Bitte wähle eine Kategorie"),
+  startDate: z.date(),
+  endDate: z.date(),
+}).refine((data) => data.endDate >= data.startDate, {
+  message: "Das Enddatum muss nach dem Startdatum liegen",
+  path: ["endDate"],
+});
 
 interface AddEventDialogProps {
   isOpen: boolean;
   onClose: () => void;
   defaultRange: { start: Date; end: Date } | null;
-  categories: Category[]; // Neue Prop
+  categories: Category[];
   onAddEvent: (title: string, startDate: Date, endDate: Date, categoryId: string) => void;
 }
 
 export function AddEventDialog({ isOpen, onClose, categories, defaultRange, onAddEvent }: AddEventDialogProps) {
-  const [title, setTitle] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      categoryId: "",
+      startDate: new Date(),
+      endDate: new Date(),
+    },
+  })
 
-  // Reset und Init wenn Dialog aufgeht
   useEffect(() => {
     if (isOpen && defaultRange) {
-      // Beide Daten vom Drag übernehmen
-      setStartDate(defaultRange.start);
-      setEndDate(defaultRange.end);
-
-      setTitle("");
-      if (categories.length > 0) setCategoryId(categories[0].id);
+      form.reset({
+        title: "",
+        categoryId: categories[0]?.id || "",
+        startDate: defaultRange.start,
+        endDate: defaultRange.end,
+      })
     }
-  }, [isOpen, defaultRange, categories]);
+  }, [isOpen, defaultRange, categories, form]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (startDate && endDate && title) {
-      // Sicherstellen, dass endDate nicht vor startDate liegt
-      const finalEnd = endDate < startDate ? startDate : endDate;
-      onAddEvent(title, startDate, finalEnd, categoryId);
-      onClose();
-    }
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    onAddEvent(values.title, values.startDate, values.endDate, values.categoryId);
+    onClose();
   };
 
   if (!defaultRange) return null;
@@ -56,79 +75,103 @@ export function AddEventDialog({ isOpen, onClose, categories, defaultRange, onAd
         <DialogHeader>
           <DialogTitle>Neuer Eintrag</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-6 py-4">
 
-          {/* Titel Input */}
-          <div className="grid gap-2">
-            <Label htmlFor="title">Was hast du vor?</Label>
-            <Input
-              id="title"
-              placeholder="z.B. Urlaub in Spanien"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
+
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Was hast du vor?</FormLabel>
+                  <FormControl>
+                    <Input placeholder="z.B. Urlaub in Spanien" {...field} autoFocus />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Typ Auswahl */}
-            <div className="grid gap-2">
-              <Label>Kategorie</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
-                        {cat.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kategorie</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map(cat => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${cat.color}`}></div>
+                              {cat.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="mb-1 leading-normal">Bis wann?</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal pl-3",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                            {field.value ? (
+                              format(field.value, "d. MMM", { locale: de })
+                            ) : (
+                              <span>Datum wählen</span>
+                            )}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < form.getValues("startDate")}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            {/* Zeitraum Auswahl (Vereinfacht: Nur Enddatum wählen, Start ist fixiert auf Klick) */}
-            <div className="grid gap-2">
-              <Label>Bis wann?</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "d. MMM", { locale: de }) : <span>Datum wählen</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(date) => date < (startDate || new Date())}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div className="text-sm text-slate-500 bg-slate-50 p-3 rounded-md">
+              Geplant: <strong>{form.watch("title") || "..."}</strong> vom {form.watch("startDate") && format(form.watch("startDate"), "d.M.", { locale: de })} bis {form.watch("endDate") && format(form.watch("endDate"), "d.M.yyyy", { locale: de })}
             </div>
-          </div>
 
-          {/* Zusammenfassung */}
-          <div className="text-sm text-slate-500 bg-slate-50 p-3 rounded-md">
-            Geplant: <strong>{title || "..."}</strong> vom {startDate && format(startDate, "d.M.", { locale: de })} bis {endDate && format(endDate, "d.M.yyyy", { locale: de })}
-          </div>
-
-          <DialogFooter>
-            <Button type="submit" disabled={!title}>Speichern</Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="submit" disabled={!form.formState.isValid}>Speichern</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
